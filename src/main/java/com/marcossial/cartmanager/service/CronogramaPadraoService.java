@@ -36,8 +36,11 @@ public class CronogramaPadraoService {
     public CronogramaPadrao registrarCronogramaPadrao(CronogramaPadraoRequestDTO dto) {
         Carrinho carrinho = carrinhoService.encontrarCarrinhoPorId(dto.carrinhoId())
                 .orElseThrow(() -> new EntityNotFoundException("Carrinho de ID : " + dto.carrinhoId() + " não encontrado"));
-        Professor professor = professorService.encontrarProfessorPorId(dto.professorId())
-                .orElseThrow(() -> new EntityNotFoundException("Professor de ID : " + dto.professorId() + " não encontrado"));
+        Professor professor = null;
+        if (dto.professorId() != null) {
+            professor = professorService.encontrarProfessorPorId(dto.professorId())
+                    .orElseThrow(() -> new EntityNotFoundException("Professor de ID : " + dto.professorId() + " não encontrado"));
+        }
         Turma turma = turmaService.encontrarTurmaPorId(dto.turmaId())
                 .orElseThrow(() -> new EntityNotFoundException("Turma de ID : " + dto.turmaId() + " não encontrada"));
         Aula aula = aulaService.encontrarAulaPorId(dto.aulaId())
@@ -96,8 +99,11 @@ public class CronogramaPadraoService {
         return cronogramaPadraoRepository.findById(id).map(existente -> {
             Carrinho carrinho = carrinhoService.encontrarCarrinhoPorId(dto.carrinhoId())
                     .orElseThrow(() -> new EntityNotFoundException("Carrinho de ID : " + dto.carrinhoId() + " não encontrado"));
-            Professor professor = professorService.encontrarProfessorPorId(dto.professorId())
-                    .orElseThrow(() -> new EntityNotFoundException("Professor de ID : " + dto.professorId() + " não encontrado"));
+            Professor professor = null;
+            if (dto.professorId() != null) {
+                professor = professorService.encontrarProfessorPorId(dto.professorId())
+                        .orElseThrow(() -> new EntityNotFoundException("Professor de ID : " + dto.professorId() + " não encontrado"));
+            }
             Turma turma = turmaService.encontrarTurmaPorId(dto.turmaId())
                     .orElseThrow(() -> new EntityNotFoundException("Turma de ID : " + dto.turmaId() + " não encontrada"));
             Aula aula = aulaService.encontrarAulaPorId(dto.aulaId())
