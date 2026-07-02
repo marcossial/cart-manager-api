@@ -1,6 +1,6 @@
 package com.marcossial.cartmanager.controller;
 
-import com.marcossial.cartmanager.dto.AulaConsolidadaResponseDTO;
+import com.marcossial.cartmanager.dto.CronogramaResponseDTO;
 import com.marcossial.cartmanager.service.CronogramaConsolidadoService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ public class CronogramaConsolidadoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AulaConsolidadaResponseDTO>> obterCronograma(
+    public ResponseEntity<List<CronogramaResponseDTO>> obterCronograma(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
             @RequestParam(required = false) Integer carrinhoId) {
         

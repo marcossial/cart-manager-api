@@ -5,9 +5,10 @@ import com.marcossial.cartmanager.domain.Aula;
 import com.marcossial.cartmanager.domain.Carrinho;
 import com.marcossial.cartmanager.domain.CronogramaPadrao;
 import com.marcossial.cartmanager.domain.Professor;
+import com.marcossial.cartmanager.domain.Reserva;
 import com.marcossial.cartmanager.domain.Turma;
 import com.marcossial.cartmanager.domain.enums.DiaSemana;
-import com.marcossial.cartmanager.dto.AulaConsolidadaResponseDTO;
+import com.marcossial.cartmanager.dto.CronogramaResponseDTO;
 import com.marcossial.cartmanager.dto.enums.OrigemAulaConsolidada;
 import com.marcossial.cartmanager.repository.AgendamentoRepository;
 import com.marcossial.cartmanager.repository.AulaRepository;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -42,13 +44,42 @@ public class CronogramaConsolidadoService {
         this.agendamentoRepository = agendamentoRepository;
     }
 
-    public List<AulaConsolidadaResponseDTO> obterCronogramaConsolidadoDiario(LocalDate data) {
-        return carrinhoRepository.findAll().stream()
+    public List<CronogramaResponseDTO> obterCronogramaConsolidadoDiario(LocalDate data) {
+        List<CronogramaResponseDTO> cronogramasIndividuais = carrinhoRepository.findAll().stream()
                 .flatMap(carrinho -> obterCronogramaConsolidado(data, carrinho.getId()).stream())
-                .collect(Collectors.toList());
+                .toList();
+
+        Map<Integer, List<CronogramaResponseDTO>> agrupadoPorAula = cronogramasIndividuais.stream()
+                .collect(Collectors.groupingBy(CronogramaResponseDTO::numeroAula));
+
+        return agrupadoPorAula.entrySet().stream()
+                .map(entry -> {
+                    List<CronogramaResponseDTO> dtosDaAula = entry.getValue();
+                    CronogramaResponseDTO base = dtosDaAula.get(0);
+
+                    Reserva[] todasReservas = dtosDaAula.stream()
+                            .flatMap(dto -> Arrays.stream(dto.reservas()))
+                            .toArray(Reserva[]::new);
+
+                    OrigemAulaConsolidada origemGeral = dtosDaAula.stream()
+                            .map(CronogramaResponseDTO::origem)
+                            .filter(o -> o == OrigemAulaConsolidada.ALTERACAO)
+                            .findFirst()
+                            .orElse(OrigemAulaConsolidada.PADRAO);
+
+                    return new CronogramaResponseDTO(
+                            base.numeroAula(),
+                            base.horaInicio(),
+                            base.horaFim(),
+                            todasReservas,
+                            origemGeral
+                    );
+                })
+                .sorted(Comparator.comparing(CronogramaResponseDTO::numeroAula))
+                .toList();
     }
 
-    public List<AulaConsolidadaResponseDTO> obterCronogramaConsolidado(LocalDate data, Integer carrinhoId) {
+    public List<CronogramaResponseDTO> obterCronogramaConsolidado(LocalDate data, Integer carrinhoId) {
         Carrinho carrinho = carrinhoRepository.findById(carrinhoId)
                 .orElseThrow(() -> new EntityNotFoundException("Carrinho não encontrado"));
 
@@ -99,17 +130,17 @@ public class CronogramaConsolidadoService {
         };
     }
 
-    private AulaConsolidadaResponseDTO criarDto(Aula aula, Carrinho carrinho, Professor professor, Turma turma, OrigemAulaConsolidada origem) {
+    private CronogramaResponseDTO criarDto(Aula aula, Carrinho carrinho, Professor professor, Turma turma, OrigemAulaConsolidada origem) {
         String professorNome = (professor != null) ? professor.getNome() : null;
         String turmaNome = (turma != null) ? turma.getNome() : null;
-        
-        return new AulaConsolidadaResponseDTO(
+
+        Reserva reserva = new Reserva(carrinho.getNome(), turmaNome, professorNome);
+
+        return new CronogramaResponseDTO(
                 (int) aula.getNumeroAula(),
                 aula.getHoraInicio(),
                 aula.getHoraFim(),
-                carrinho.getNome(),
-                professorNome,
-                turmaNome,
+                new Reserva[]{reserva},
                 origem
         );
     }
