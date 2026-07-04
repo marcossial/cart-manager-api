@@ -21,12 +21,13 @@ public class CronogramaConsolidadoController {
     @GetMapping
     public ResponseEntity<List<CronogramaResponseDTO>> obterCronograma(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
-            @RequestParam(required = false) Integer carrinhoId) {
+            @RequestParam(required = false) Integer carrinhoId,
+            @RequestParam(defaultValue = "false") boolean somentePadrao) {
         
         if (carrinhoId != null) {
-            return ResponseEntity.ok(cronogramaConsolidadoService.obterCronogramaConsolidado(data, carrinhoId));
+            return ResponseEntity.ok(cronogramaConsolidadoService.obterCronogramaConsolidado(data, carrinhoId, somentePadrao));
         } else {
-            return ResponseEntity.ok(cronogramaConsolidadoService.obterCronogramaConsolidadoDiario(data));
+            return ResponseEntity.ok(cronogramaConsolidadoService.obterCronogramaConsolidadoDiario(data, somentePadrao));
         }
     }
 }

@@ -44,9 +44,9 @@ public class CronogramaConsolidadoService {
         this.agendamentoRepository = agendamentoRepository;
     }
 
-    public List<CronogramaResponseDTO> obterCronogramaConsolidadoDiario(LocalDate data) {
+    public List<CronogramaResponseDTO> obterCronogramaConsolidadoDiario(LocalDate data, boolean somentePadrao) {
         List<CronogramaResponseDTO> cronogramasIndividuais = carrinhoRepository.findAll().stream()
-                .flatMap(carrinho -> obterCronogramaConsolidado(data, carrinho.getId()).stream())
+                .flatMap(carrinho -> obterCronogramaConsolidado(data, carrinho.getId(), somentePadrao).stream())
                 .toList();
 
         Map<Integer, List<CronogramaResponseDTO>> agrupadoPorAula = cronogramasIndividuais.stream()
@@ -79,7 +79,7 @@ public class CronogramaConsolidadoService {
                 .toList();
     }
 
-    public List<CronogramaResponseDTO> obterCronogramaConsolidado(LocalDate data, Integer carrinhoId) {
+    public List<CronogramaResponseDTO> obterCronogramaConsolidado(LocalDate data, Integer carrinhoId, boolean somentePadrao) {
         Carrinho carrinho = carrinhoRepository.findById(carrinhoId)
                 .orElseThrow(() -> new EntityNotFoundException("Carrinho não encontrado"));
 
@@ -92,21 +92,28 @@ public class CronogramaConsolidadoService {
                 cronogramaPadraoRepository.findByCarrinhoAndDiaSemana(carrinho, diaSemana) :
                 Collections.emptyList();
 
-        List<Agendamento> agendamentosList = agendamentoRepository.findByDataAndCarrinho(data, carrinho);
-
         Map<Integer, CronogramaPadrao> padraoMap = cronogramaPadraoList.stream()
                 .collect(Collectors.toMap(c -> c.getAula().getId(), c -> c));
 
-        Map<Integer, Agendamento> agendamentoMap = agendamentosList.stream()
-                .collect(Collectors.toMap(a -> a.getAula().getId(), a -> a));
+        Map<Integer, Agendamento> agendamentoMap = Collections.emptyMap();
+
+        if (!somentePadrao) {
+            List<Agendamento> agendamentosList = agendamentoRepository.findByDataAndCarrinho(data, carrinho);
+            agendamentoMap = agendamentosList.stream()
+                    .collect(Collectors.toMap(a -> a.getAula().getId(), a -> a));
+        }
+
+        final Map<Integer, Agendamento> finalAgendamentoMap = agendamentoMap;
 
         return todasAulas.stream().map(aula -> {
-            Agendamento agendamento = agendamentoMap.get(aula.getId());
-            if (agendamento != null) {
-                if (agendamento.getProfessor() == null) {
-                    return criarDto(aula, carrinho, null, null, OrigemAulaConsolidada.LIVRE);
-                } else {
-                    return criarDto(aula, carrinho, agendamento.getProfessor(), agendamento.getTurma(), OrigemAulaConsolidada.ALTERACAO);
+            if (!somentePadrao) {
+                Agendamento agendamento = finalAgendamentoMap.get(aula.getId());
+                if (agendamento != null) {
+                    if (agendamento.getProfessor() == null) {
+                        return criarDto(aula, carrinho, null, null, OrigemAulaConsolidada.LIVRE);
+                    } else {
+                        return criarDto(aula, carrinho, agendamento.getProfessor(), agendamento.getTurma(), OrigemAulaConsolidada.ALTERACAO);
+                    }
                 }
             }
 
