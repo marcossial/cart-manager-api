@@ -45,10 +45,12 @@ public class UsuarioAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 });
             }
-            filterChain.doFilter(request, response);
         } catch (Exception e) {
             handleExceptionManually(response, request, e);
+            return;
         }
+
+        filterChain.doFilter(request, response);
     }
 
     private void handleExceptionManually(HttpServletResponse response, HttpServletRequest request, Exception e) throws IOException {

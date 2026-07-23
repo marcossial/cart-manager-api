@@ -28,9 +28,9 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<String> criarUsuario(@RequestBody CriarUsuario dto) {
-        usuarioService.criarUsuario(dto);
-        return new ResponseEntity<>("Usuario criado com sucesso", HttpStatus.CREATED);
+    public ResponseEntity<RecoveryJwtTokenDto> criarUsuario(@RequestBody CriarUsuario dto) {
+        RecoveryJwtTokenDto token = usuarioService.criarUsuario(dto);
+        return new ResponseEntity<>(token, HttpStatus.CREATED);
     }
 
     @GetMapping("/test")

@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class CronogramaPadraoService {
@@ -55,6 +53,7 @@ public class CronogramaPadraoService {
         return cronogramaPadraoRepository.save(new CronogramaPadrao(
                 null,
                 dto.diaSemana(),
+                dto.tipoSemana(),
                 carrinho,
                 professor,
                 turma,

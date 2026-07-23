@@ -37,10 +37,10 @@ public class UsuarioService {
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
-        return new RecoveryJwtTokenDto(jwtTokenService.generateToken(usuario));
+        return new RecoveryJwtTokenDto(jwtTokenService.generateToken(usuario), usuario.getPerfil().name());
     }
 
-    public void criarUsuario(CriarUsuario dto) {
+    public RecoveryJwtTokenDto criarUsuario(CriarUsuario dto) {
         if (usuarioRepository.findByEmail(dto.email()).isPresent()) {
             throw new RegraDeNegocioException("Email ja cadastrado");
         }
@@ -51,5 +51,7 @@ public class UsuarioService {
         novoUsuario.setPerfil(dto.perfil());
 
         usuarioRepository.save(novoUsuario);
+
+        return new RecoveryJwtTokenDto(jwtTokenService.generateToken(novoUsuario), novoUsuario.getPerfil().name());
     }
 }

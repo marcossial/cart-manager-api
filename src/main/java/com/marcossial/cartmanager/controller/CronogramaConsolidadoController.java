@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/cronograma")
 public class CronogramaConsolidadoController {
+
     private final CronogramaConsolidadoService cronogramaConsolidadoService;
 
     public CronogramaConsolidadoController(CronogramaConsolidadoService cronogramaConsolidadoService) {
@@ -23,7 +24,7 @@ public class CronogramaConsolidadoController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
             @RequestParam(required = false) Integer carrinhoId,
             @RequestParam(defaultValue = "false") boolean somentePadrao) {
-        
+
         if (carrinhoId != null) {
             return ResponseEntity.ok(cronogramaConsolidadoService.obterCronogramaConsolidado(data, carrinhoId, somentePadrao));
         } else {

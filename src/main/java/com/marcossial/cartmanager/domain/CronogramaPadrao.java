@@ -1,6 +1,7 @@
 package com.marcossial.cartmanager.domain;
 
 import com.marcossial.cartmanager.domain.enums.DiaSemana;
+import com.marcossial.cartmanager.domain.enums.TipoSemana;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -24,6 +25,10 @@ public class CronogramaPadrao {
     @Column(name = "dia_semana", nullable = false, length = 15)
     private DiaSemana diaSemana;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_semana", nullable = false, length = 15)
+    private TipoSemana tipoSemana = TipoSemana.AMBAS;
+
     @ManyToOne
     @JoinColumn(name = "carrinho_id")
     private Carrinho carrinho;
@@ -42,9 +47,10 @@ public class CronogramaPadrao {
 
     public CronogramaPadrao() { }
 
-    public CronogramaPadrao(Integer id, DiaSemana diaSemana, Carrinho carrinho, Professor professor, Turma turma, Aula aula) {
+    public CronogramaPadrao(Integer id, DiaSemana diaSemana, TipoSemana tipoSemana, Carrinho carrinho, Professor professor, Turma turma, Aula aula) {
         this.id = id;
         this.diaSemana = diaSemana;
+        this.tipoSemana = tipoSemana != null ? tipoSemana : TipoSemana.AMBAS;
         this.carrinho = carrinho;
         this.professor = professor;
         this.turma = turma;
@@ -61,6 +67,14 @@ public class CronogramaPadrao {
 
     public void setDiaSemana(DiaSemana diaSemana) {
         this.diaSemana = diaSemana;
+    }
+
+    public TipoSemana getTipoSemana() {
+        return tipoSemana;
+    }
+
+    public void setTipoSemana(TipoSemana tipoSemana) {
+        this.tipoSemana = tipoSemana;
     }
 
     public Carrinho getCarrinho() {
