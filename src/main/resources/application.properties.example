@@ -1,0 +1,16 @@
+# application
+spring.application.name=cart manager
+
+# datasource
+spring.datasource.url=jdbc:postgresql://ip:port/db
+spring.datasource.username=user
+spring.datasource.password=password
+
+# jpa
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.show_sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# auth
+api.security.token.secret=
